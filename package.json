@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/lan-ejiri/node.js-and-mysql-hw#readme",
   "dependencies": {
+    "color": "^3.0.0",
+    "colors": "^1.2.1",
     "inquirer": "^5.2.0",
     "mysql": "^2.15.0"
   }
