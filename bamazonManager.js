@@ -51,7 +51,7 @@ function MAINPROMPT() {
           break;
         case "Add new product":
           //   DISPLAYEVERYTHING();
-          console.log("add new product things here");
+          ADDPRODUCT();
           break;
 
         case "Quit":
@@ -90,6 +90,7 @@ function LOWINVENTORY() {
   });
 }
 // If a manager selects Add to Inventory, your app should display a prompt that will let the manager "add more" of any item currently in the store.
+
 function ADDINVENTORY() {
   var chosenid;
   var chosenproduct;
@@ -103,10 +104,10 @@ function ADDINVENTORY() {
       message: "What is the id of the product you would like to add to?"
     })
     .then(function(answer) {
-      chosenid = answer.enterproductid;
+      chosenid = answer.productid;
       console.log(colors.white("ok, you chose id: " + chosenid));
       connection.query(
-        `SELECT * FROM products WHERE id = ${chosenid}`,
+        `SELECT * FROM products WHERE id = '${chosenid}'`,
         function(err, res) {
           if (err) throw err;
           chosenproduct = res[0].product_name;
@@ -128,12 +129,13 @@ function ADDINVENTORY() {
               message: "How many would you like to add?"
             })
             .then(function(answer) {
-              chosenamount = answer.enterproductquantity;
+              chosenamount = answer.productquantity;
               console.log(colors.white("ok, you want to add " + chosenamount));
 
+              var newamount = parseInt(amountleft) + parseInt(chosenamount);
+
               connection.query(
-                `UPDATE products SET stock_quantity = ${amountleft +
-                  chosenamount} WHERE id = ${chosenid};`,
+                `UPDATE products SET stock_quantity = ${newamount} WHERE id = ${chosenid};`,
                 function(err, res) {
                   if (err) throw err;
 
@@ -148,13 +150,12 @@ function ADDINVENTORY() {
                       );
                       for (i = 0; i < res.length; i++) {
                         console.log(
-                          colors.white(
-                            `Inventory updated. New amount of ${chosenproduct} is ${
-                              res[0].stock_quantity
-                            }`
-                          )
+                          `Inventory updated. New amount of ${chosenproduct} is ${
+                            res[0].stock_quantity
+                          }`.purchase
                         );
                       } //for loop
+                      MAINPROMPT();
                     }
                   ); //connection query
                 }
@@ -166,6 +167,53 @@ function ADDINVENTORY() {
 }
 
 // If a manager selects Add New Product, it should allow the manager to add a completely new product to the store.
+function ADDPRODUCT() {
+  var productname, productcategory, productquantity, productprice;
+
+  inquirer
+    .prompt([
+      {
+        name: "prodname",
+        type: "input",
+        message: "What is the name of the product you would like to add?"
+      },
+      {
+        name: "prodcat",
+        type: "input",
+        message: "What category does this item belong to?"
+      },
+      {
+        name: "prodprice",
+        type: "input",
+        message: "How much should this item cost?"
+      },
+      {
+        name: "prodquantity",
+        type: "input",
+        message: "How many would you like to add?"
+      }]
+    )
+    .then(function(answer) {
+      productname = answer.prodname;
+      productcategory = answer.prodcat;
+      productquantity = answer.prodquantity;
+      productprice = answer.prodprice;
+      connection.query(
+        `insert into products (product_name, department_name, price, stock_quantity) values ('${productname}', '${productcategory}', '${productprice}', '${productquantity}')`,
+        function(err, res) {
+          if (err) throw err;
+          console.log(
+            `You have added ${productquantity} ${productname}s into ${productcategory} for ${productprice} each`
+              .white
+          );
+          MAINPROMPT();
+        }
+      ); //connectionqury
+     
+    }); //then function answer
+
+   
+} //function add product
 
 function DISPLAYEVERYTHING() {
   connection.query("SELECT * FROM products", function(err, res) {
